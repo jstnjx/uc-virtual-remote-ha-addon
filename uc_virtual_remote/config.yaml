@@ -20,6 +20,7 @@ apparmor: false
 ingress: true
 ingress_port: 11090
 ingress_entry: /configurator/
+ingress_stream: true
 panel_icon: mdi:remote
 panel_title: UC Virtual Remote
 webui: http://[HOST]:[PORT:11090]/configurator/
