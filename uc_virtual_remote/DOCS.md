@@ -4,7 +4,9 @@ This add-on runs the upstream **UC Virtual Remote** appliance inside Home Assist
 
 ## Before starting
 
-The appliance contains an internal Docker daemon. After installation, open the add-on's **Configuration / Info** page and disable **Protection mode** before starting it. Full access is required for nested Docker and hardware/network services.
+The appliance contains an internal Docker daemon. The add-on explicitly requests the `SYS_ADMIN` capability required for Docker mount namespaces, so **Protection mode does not need to be disabled just to start UC Virtual Remote or its internal Docker runtime**.
+
+The add-on also declares `full_access: true` for broad hardware/device access. Home Assistant only applies `full_access` when Protection mode is disabled. Leave Protection mode enabled unless you specifically need unrestricted hardware/device access for an integration; disable it only for that use case and with the usual Home Assistant security implications in mind.
 
 ## Configuration
 
