@@ -1,0 +1,16 @@
+configuration:
+  pin:
+    name: Web Configurator PIN
+    description: Four-digit PIN used to sign in to the UC Virtual Remote Web Configurator.
+  remote_name:
+    name: Remote name
+    description: Display name advertised by the virtual Remote Core.
+  log_level:
+    name: Log level
+    description: Logging verbosity for UC Virtual Remote.
+  dind_storage_driver:
+    name: Internal Docker storage driver
+    description: Use overlay2 normally; select vfs only when nested overlay filesystems are unavailable.
+  github_token:
+    name: GitHub token
+    description: Optional token for private integration repositories and GitHub API access.
