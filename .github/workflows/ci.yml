@@ -63,6 +63,8 @@ jobs:
           grep -Eq '^slug:[[:space:]]*[a-z0-9_-]+$' uc_virtual_remote/config.yaml
           grep -Fq '  - aarch64' uc_virtual_remote/config.yaml
           grep -Fq '  - amd64' uc_virtual_remote/config.yaml
+          grep -Fq 'privileged:' uc_virtual_remote/config.yaml
+          grep -Fq '  - SYS_ADMIN' uc_virtual_remote/config.yaml
           grep -Fq 'full_access: true' uc_virtual_remote/config.yaml
           grep -Fq 'host_network: true' uc_virtual_remote/config.yaml
           grep -Fq 'ingress: true' uc_virtual_remote/config.yaml
