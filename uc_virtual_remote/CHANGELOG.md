@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.3
+
+- Version mirrored automatically from UC Virtual Remote 0.14.3.
+
 ## 0.14.2
 
 - Version mirrored automatically from UC Virtual Remote 0.14.2.
