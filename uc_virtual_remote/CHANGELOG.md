@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.1
+
+- Version mirrored from UC Virtual Remote 0.14.1.
+- Fixes Home Assistant Ingress asset and management API routing so the add-on interface loads its CSS and JavaScript through the Ingress base path instead of the Home Assistant root.
+
 ## 0.14.0
 
 - Adds Home Assistant support for both `amd64` and `aarch64` hosts.
