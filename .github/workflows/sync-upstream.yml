@@ -52,23 +52,43 @@ jobs:
 
           changelog = Path("uc_virtual_remote/CHANGELOG.md")
           current = changelog.read_text(encoding="utf-8")
-          entry = f"## {version}\n\n- Synced to UC Virtual Remote ARM64 {version}.\n\n"
+          entry = f"## {version}\n\n- Synced to UC Virtual Remote {version}.\n\n"
           if f"## {version}\n" not in current:
               current = current.replace("# Changelog\n\n", "# Changelog\n\n" + entry, 1)
               changelog.write_text(current, encoding="utf-8")
           PY
 
+      - name: Require public upstream image
+        if: steps.version.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.latest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker manifest inspect "ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}" >/dev/null
+
       - name: Set up QEMU
         if: steps.version.outputs.changed == 'true'
         uses: docker/setup-qemu-action@v4
-        with:
-          platforms: arm64
 
       - name: Set up Docker Buildx
         if: steps.version.outputs.changed == 'true'
         uses: docker/setup-buildx-action@v4
 
-      - name: Validate new upstream base image
+      - name: Validate AMD64 upstream base image
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: ./uc_virtual_remote
+          file: ./uc_virtual_remote/Dockerfile
+          platforms: linux/amd64
+          push: false
+          build-args: |
+            BUILD_VERSION=${{ steps.version.outputs.latest }}
+            BUILD_ARCH=amd64
+          tags: uc-virtual-remote-ha-addon:sync-check-amd64
+
+      - name: Validate ARM64 upstream base image
         if: steps.version.outputs.changed == 'true'
         uses: docker/build-push-action@v7
         with:
@@ -79,7 +99,7 @@ jobs:
           build-args: |
             BUILD_VERSION=${{ steps.version.outputs.latest }}
             BUILD_ARCH=aarch64
-          tags: uc-virtual-remote-ha-addon:sync-check
+          tags: uc-virtual-remote-ha-addon:sync-check-aarch64
 
       - name: Commit synchronized version
         if: steps.version.outputs.changed == 'true'
@@ -90,5 +110,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add uc_virtual_remote/config.yaml uc_virtual_remote/CHANGELOG.md
-          git commit -m "Sync UC Virtual Remote ARM64 v${VERSION}"
+          git commit -m "Sync UC Virtual Remote v${VERSION}"
           git push origin HEAD:main
