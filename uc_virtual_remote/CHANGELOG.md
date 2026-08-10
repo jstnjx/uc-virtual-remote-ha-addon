@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.8
+
+- Version mirrored from UC Virtual Remote 0.14.8.
+- Fixes the Home Assistant OS startup regression introduced in 0.14.7 when Supervisor exposes `/sys/fs/cgroup` read-only or without a delegated cgroup v2 subtree.
+- Cgroup and mount-namespace preparation for the internal Docker runtime is now best-effort instead of fatal.
+- UC Virtual Remote Core, the Web Configurator and native custom integration tarballs continue to start when nested Docker cannot be used.
+- Registry/external container integrations are degraded on affected HAOS hosts instead of preventing the entire add-on from starting.
+
 ## 0.14.7
 
 - Version mirrored from UC Virtual Remote 0.14.7.
