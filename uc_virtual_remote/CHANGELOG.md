@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.0
+
+- Adds Home Assistant support for both `amd64` and `aarch64` hosts.
+- Based directly on the matching multi-architecture `ghcr.io/jstnjx/uc-virtual-remote-arm64:0.14.0` image.
+- Runs the UC Virtual Remote Core, Web Configurator and internal Docker daemon natively on the Home Assistant host architecture.
+- Keeps normal UC ARM64 integration tarballs compatible: native execution on ARM64 and process-scoped QEMU execution on AMD64.
+- Does not install or modify a host-wide ARM64 `binfmt_misc` handler.
+- Keeps the existing add-on slug so upgrades retain the same `/data` storage and add-on identity.
+
 ## 0.13.1
 
 - Initial Home Assistant add-on release.
