@@ -26,6 +26,23 @@ jobs:
           test -n "$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Validate Home Assistant descriptor
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Eq '^name:[[:space:]]*.+' repository.yaml
+          grep -Eq '^url:[[:space:]]*https://github.com/jstnjx/uc-virtual-remote-ha-addon$' repository.yaml
+          grep -Eq '^maintainer:[[:space:]]*.+' repository.yaml
+          grep -Eq '^name:[[:space:]]*.+' uc_virtual_remote/config.yaml
+          grep -Eq '^version:[[:space:]]*"?[^"[:space:]]+"?[[:space:]]*$' uc_virtual_remote/config.yaml
+          grep -Eq '^slug:[[:space:]]*[a-z0-9_-]+$' uc_virtual_remote/config.yaml
+          grep -Fq '  - aarch64' uc_virtual_remote/config.yaml
+          grep -Fq 'full_access: true' uc_virtual_remote/config.yaml
+          grep -Fq 'host_network: true' uc_virtual_remote/config.yaml
+          grep -Fq 'ingress: true' uc_virtual_remote/config.yaml
+          grep -Eq '^webui:[[:space:]]*(https?|\[PROTO:[A-Za-z0-9_]+\])://\[HOST\]:\[PORT:[0-9]+\]/?.*$' uc_virtual_remote/config.yaml
+          grep -Eq '^watchdog:[[:space:]]*(https?|tcp)://\[HOST\]:(\[PORT:[0-9]+\]|[0-9]+)(/.*)?$' uc_virtual_remote/config.yaml
+
       - name: Validate wrapper and upstream contract
         shell: bash
         env:
@@ -34,10 +51,6 @@ jobs:
           set -euo pipefail
           bash -n uc_virtual_remote/run.sh
           grep -Fq 'FROM ghcr.io/jstnjx/uc-virtual-remote-arm64:${BUILD_VERSION}' uc_virtual_remote/Dockerfile
-          grep -Fq '  - aarch64' uc_virtual_remote/config.yaml
-          grep -Fq 'full_access: true' uc_virtual_remote/config.yaml
-          grep -Fq 'host_network: true' uc_virtual_remote/config.yaml
-          grep -Fq 'ingress: true' uc_virtual_remote/config.yaml
           UPSTREAM_VERSION="$(curl -fsSL "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/v${VERSION}/VERSION" | tr -d '\r\n')"
           test "$UPSTREAM_VERSION" = "$VERSION"
 
