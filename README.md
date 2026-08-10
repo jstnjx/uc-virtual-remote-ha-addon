@@ -4,6 +4,12 @@ Home Assistant packaging for [UC Virtual Remote](https://github.com/jstnjx/uc-vi
 
 > This repository is **not another UC Virtual Remote codebase**. It contains only Home Assistant repository metadata, the add-on descriptor, and a small startup wrapper. The add-on Dockerfile always inherits the matching `ghcr.io/jstnjx/uc-virtual-remote-arm64:<version>` image.
 
+## Versioning
+
+`uc-virtual-remote-arm64` is the **only version authority**. This add-on has no independent application version or release line.
+
+When a new upstream release is published, the add-on repository automatically mirrors that exact version into `config.yaml` after the matching public `amd64` + `arm64` GHCR image is available and both Home Assistant wrapper builds validate successfully. CI rejects any add-on version that does not exactly match the latest upstream release.
+
 ## Install
 
 Add this repository to the Home Assistant app/add-on store:
