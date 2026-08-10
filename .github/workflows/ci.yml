@@ -1,0 +1,83 @@
+name: Validate add-on
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Read add-on version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(sed -nE 's/^version:[[:space:]]*"?([^"[:space:]]+)"?[[:space:]]*$/\1/p' uc_virtual_remote/config.yaml)"
+          test -n "$VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Validate wrapper and upstream contract
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          bash -n uc_virtual_remote/run.sh
+          grep -Fq 'FROM ghcr.io/jstnjx/uc-virtual-remote-arm64:${BUILD_VERSION}' uc_virtual_remote/Dockerfile
+          grep -Fq '  - aarch64' uc_virtual_remote/config.yaml
+          grep -Fq 'full_access: true' uc_virtual_remote/config.yaml
+          grep -Fq 'host_network: true' uc_virtual_remote/config.yaml
+          grep -Fq 'ingress: true' uc_virtual_remote/config.yaml
+          UPSTREAM_VERSION="$(curl -fsSL "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/v${VERSION}/VERSION" | tr -d '\r\n')"
+          test "$UPSTREAM_VERSION" = "$VERSION"
+
+      - name: Check anonymous upstream image access
+        id: registry
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}"
+          if docker manifest inspect "$IMAGE" >/dev/null 2>&1; then
+            echo "public=true" >> "$GITHUB_OUTPUT"
+            echo "Upstream image is anonymously pullable: $IMAGE"
+          else
+            echo "public=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Upstream image $IMAGE is not anonymously pullable. Home Assistant cannot build/install this add-on until the GHCR package visibility is Public."
+          fi
+
+      - name: Set up QEMU
+        if: steps.registry.outputs.public == 'true'
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        if: steps.registry.outputs.public == 'true'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Home Assistant wrapper from upstream ARM64 image
+        if: steps.registry.outputs.public == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: ./uc_virtual_remote
+          file: ./uc_virtual_remote/Dockerfile
+          platforms: linux/arm64
+          push: false
+          build-args: |
+            BUILD_VERSION=${{ steps.version.outputs.version }}
+            BUILD_ARCH=aarch64
+          tags: uc-virtual-remote-ha-addon:ci
+          cache-from: type=gha,scope=addon
+          cache-to: type=gha,mode=max,scope=addon
