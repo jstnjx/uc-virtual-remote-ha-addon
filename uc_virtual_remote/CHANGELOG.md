@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.5
+
+- Version mirrored from UC Virtual Remote 0.14.5.
+- Detects missing mount-namespace privilege at startup so Home Assistant clearly reports that Protection mode must be disabled before registry/external integrations can use the internal Docker runtime.
+- Fixes ARM64 PyInstaller onedir custom integrations on AMD64 while keeping QEMU process-scoped and avoiding host-wide `binfmt_misc` registration.
+- Keeps secondary ARM64 package executables such as bundled Node and Whisper runtimes under scoped QEMU on AMD64 without modifying packaged shared libraries.
+
 ## 0.14.4
 
 - Version mirrored automatically from UC Virtual Remote 0.14.4.
