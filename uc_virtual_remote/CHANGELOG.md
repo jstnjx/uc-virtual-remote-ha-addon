@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.7
+
+- Version mirrored from UC Virtual Remote 0.14.7.
+- Prepares a writable/delegated cgroup v2 hierarchy for the internal Docker daemon so registry-backed integration builds can start their build containers on Home Assistant.
+- Fixes ARM64 PyInstaller onedir integrations on AMD64 by using a bootloader-compatible parent-process level instead of the invalid `-1` value.
+- Treats `min_core_api` as informational for custom integration tarballs instead of rejecting packages before startup.
+- Supports documented Node.js custom integration packages using `bin/driver.js` in addition to native `bin/driver` executables.
+- Returns a concrete integration-start error instead of a generic HTTP 500 when an uploaded driver fails to open its Integration API port.
+- Adds a Management reconciliation scan for stale/orphaned integration records and duplicate driver IDs, with conservative automatic repair for unreferenced stale records.
+
 ## 0.14.6
 
 - Version mirrored from UC Virtual Remote 0.14.6.
