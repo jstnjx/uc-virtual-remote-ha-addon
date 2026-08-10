@@ -3,7 +3,9 @@
 ## 0.14.5
 
 - Version mirrored from UC Virtual Remote 0.14.5.
-- Detects missing mount-namespace privilege at startup so Home Assistant clearly reports that Protection mode must be disabled before registry/external integrations can use the internal Docker runtime.
+- Requests Home Assistant's `SYS_ADMIN` capability explicitly so the internal Docker runtime can create mount namespaces without relying on `full_access` to grant Linux capabilities.
+- Clarifies that Protection mode only gates `full_access`; disabling Protection mode is not the fix for a missing `SYS_ADMIN` capability.
+- Detects missing mount-namespace privilege at startup before attempting registry/external integration work.
 - Fixes ARM64 PyInstaller onedir custom integrations on AMD64 while keeping QEMU process-scoped and avoiding host-wide `binfmt_misc` registration.
 - Keeps secondary ARM64 package executables such as bundled Node and Whisper runtimes under scoped QEMU on AMD64 without modifying packaged shared libraries.
 
