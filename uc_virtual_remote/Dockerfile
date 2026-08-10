@@ -9,7 +9,7 @@ LABEL \
   io.hass.type="app" \
   io.hass.arch="${BUILD_ARCH}" \
   org.opencontainers.image.source="https://github.com/jstnjx/uc-virtual-remote-ha-addon" \
-  org.opencontainers.image.title="UC Virtual Remote ARM64 Home Assistant Add-on"
+  org.opencontainers.image.title="UC Virtual Remote Home Assistant Add-on"
 
 COPY run.sh /usr/local/bin/ucvr-ha-addon
 RUN chmod 0755 /usr/local/bin/ucvr-ha-addon
