@@ -26,6 +26,31 @@ jobs:
           test -n "$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Require latest upstream version
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          RELEASE_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/releases/latest)"
+          TAG="$(jq -r '.tag_name // empty' <<<"$RELEASE_JSON")"
+          test -n "$TAG"
+
+          LATEST="${TAG#v}"
+          UPSTREAM_VERSION="$(curl -fsSL \
+            "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/${TAG}/VERSION" \
+            | tr -d '\r\n')"
+
+          test "$LATEST" = "$UPSTREAM_VERSION"
+          if [[ "$VERSION" != "$UPSTREAM_VERSION" ]]; then
+            echo "Add-on version $VERSION does not match latest upstream version $UPSTREAM_VERSION." >&2
+            exit 1
+          fi
+          echo "Add-on version mirrors latest upstream release: $UPSTREAM_VERSION"
+
       - name: Validate Home Assistant descriptor
         shell: bash
         run: |
@@ -62,8 +87,12 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE="ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}"
-          docker manifest inspect "$IMAGE" >/dev/null
-          echo "Upstream image is anonymously pullable: $IMAGE"
+          MANIFEST="$(docker manifest inspect "$IMAGE")"
+          jq -e '
+            ([.manifests[]?.platform.architecture] | index("amd64")) != null
+            and ([.manifests[]?.platform.architecture] | index("arm64")) != null
+          ' <<<"$MANIFEST" >/dev/null
+          echo "Upstream amd64+arm64 image is anonymously pullable: $IMAGE"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4

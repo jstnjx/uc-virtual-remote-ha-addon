@@ -47,9 +47,13 @@ Normal UC ARM64 integration tarballs remain unchanged:
 
 External integrations continue to run as containers inside UC Virtual Remote's internal Docker daemon. Source-built external integrations build for the host architecture. Prebuilt external images need a compatible host-architecture variant or a registry source-build fallback.
 
-## Updates
+## Updates and versioning
 
-The add-on version intentionally follows the upstream UC Virtual Remote version. The add-on Dockerfile uses the same version as its upstream multi-architecture image, so it does not maintain an independent application codebase.
+`uc-virtual-remote-arm64` is the only version authority. The Home Assistant add-on does not maintain an independent version line.
+
+The add-on's required literal `version:` field is mirrored automatically from the latest published upstream release. The mirror only commits after the matching public `amd64` + `arm64` image exists and both wrapper builds succeed. CI rejects any add-on version that differs from the latest upstream release.
+
+Therefore, application releases are made only in `uc-virtual-remote-arm64`; this packaging repository follows them automatically.
 
 ## Backup
 

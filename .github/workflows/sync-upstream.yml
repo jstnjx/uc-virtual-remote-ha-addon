@@ -1,12 +1,16 @@
-name: Sync upstream release
+name: Mirror upstream version
 
 on:
   schedule:
-    - cron: "17 4 * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: mirror-upstream-version
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -15,27 +19,67 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Resolve latest upstream release
+      - name: Resolve authoritative upstream version
         id: version
         shell: bash
         run: |
           set -euo pipefail
-          LATEST="$(curl -fsSL https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
+
+          RELEASE_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/releases/latest)"
+          TAG="$(jq -r '.tag_name // empty' <<<"$RELEASE_JSON")"
+          test -n "$TAG"
+
+          VERSION="${TAG#v}"
+          UPSTREAM_VERSION="$(curl -fsSL \
+            "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/${TAG}/VERSION" \
+            | tr -d '\r\n')"
           CURRENT="$(sed -nE 's/^version:[[:space:]]*"?([^"[:space:]]+)"?[[:space:]]*$/\1/p' uc_virtual_remote/config.yaml)"
-          test -n "$LATEST"
+
+          test -n "$VERSION"
+          test -n "$UPSTREAM_VERSION"
           test -n "$CURRENT"
-          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          test "$VERSION" = "$UPSTREAM_VERSION"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
-          if [[ "$LATEST" == "$CURRENT" ]]; then
+          if [[ "$VERSION" == "$CURRENT" ]]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Update add-on metadata
+      - name: Wait for matching public multiarch image
         if: steps.version.outputs.changed == 'true'
         env:
-          VERSION: ${{ steps.version.outputs.latest }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}"
+
+          for attempt in $(seq 1 30); do
+            if MANIFEST="$(docker manifest inspect "$IMAGE" 2>/dev/null)" \
+              && jq -e '
+                ([.manifests[]?.platform.architecture] | index("amd64")) != null
+                and ([.manifests[]?.platform.architecture] | index("arm64")) != null
+              ' <<<"$MANIFEST" >/dev/null; then
+              echo "Upstream multiarch image is ready: $IMAGE"
+              exit 0
+            fi
+            echo "Waiting for upstream image publication ($attempt/30)..."
+            sleep 20
+          done
+
+          echo "Upstream release ${VERSION} exists, but its public amd64+arm64 image is not ready." >&2
+          exit 1
+
+      - name: Update mirrored add-on version
+        if: steps.version.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           python3 - <<'PY'
           import os
@@ -45,27 +89,27 @@ jobs:
           version = os.environ["VERSION"]
           config = Path("uc_virtual_remote/config.yaml")
           text = config.read_text(encoding="utf-8")
-          text, count = re.subn(r'^version:\s*.*$', f'version: "{version}"', text, count=1, flags=re.M)
+          text, count = re.subn(
+              r'^version:\s*.*$',
+              f'version: "{version}"',
+              text,
+              count=1,
+              flags=re.M,
+          )
           if count != 1:
               raise SystemExit("Unable to update add-on version")
           config.write_text(text, encoding="utf-8")
 
           changelog = Path("uc_virtual_remote/CHANGELOG.md")
           current = changelog.read_text(encoding="utf-8")
-          entry = f"## {version}\n\n- Synced to UC Virtual Remote {version}.\n\n"
+          entry = (
+              f"## {version}\n\n"
+              f"- Version mirrored automatically from UC Virtual Remote {version}.\n\n"
+          )
           if f"## {version}\n" not in current:
               current = current.replace("# Changelog\n\n", "# Changelog\n\n" + entry, 1)
               changelog.write_text(current, encoding="utf-8")
           PY
-
-      - name: Require public upstream image
-        if: steps.version.outputs.changed == 'true'
-        env:
-          VERSION: ${{ steps.version.outputs.latest }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker manifest inspect "ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}" >/dev/null
 
       - name: Set up QEMU
         if: steps.version.outputs.changed == 'true'
@@ -75,7 +119,7 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         uses: docker/setup-buildx-action@v4
 
-      - name: Validate AMD64 upstream base image
+      - name: Validate AMD64 wrapper against mirrored version
         if: steps.version.outputs.changed == 'true'
         uses: docker/build-push-action@v7
         with:
@@ -84,11 +128,11 @@ jobs:
           platforms: linux/amd64
           push: false
           build-args: |
-            BUILD_VERSION=${{ steps.version.outputs.latest }}
+            BUILD_VERSION=${{ steps.version.outputs.version }}
             BUILD_ARCH=amd64
           tags: uc-virtual-remote-ha-addon:sync-check-amd64
 
-      - name: Validate ARM64 upstream base image
+      - name: Validate ARM64 wrapper against mirrored version
         if: steps.version.outputs.changed == 'true'
         uses: docker/build-push-action@v7
         with:
@@ -97,18 +141,18 @@ jobs:
           platforms: linux/arm64
           push: false
           build-args: |
-            BUILD_VERSION=${{ steps.version.outputs.latest }}
+            BUILD_VERSION=${{ steps.version.outputs.version }}
             BUILD_ARCH=aarch64
           tags: uc-virtual-remote-ha-addon:sync-check-aarch64
 
-      - name: Commit synchronized version
+      - name: Commit mirrored version
         if: steps.version.outputs.changed == 'true'
         env:
-          VERSION: ${{ steps.version.outputs.latest }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add uc_virtual_remote/config.yaml uc_virtual_remote/CHANGELOG.md
-          git commit -m "Sync UC Virtual Remote v${VERSION}"
+          git commit -m "Mirror UC Virtual Remote v${VERSION}"
           git push origin HEAD:main
