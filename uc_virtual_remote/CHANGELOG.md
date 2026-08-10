@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.4
+
+- Version mirrored automatically from UC Virtual Remote 0.14.4.
+- Fixes native integration packages containing normal package-internal symbolic links such as npm `.bin` entries.
+- Adds the ARM64 zlib and C++ runtime needed by ARM64 UC integrations running through scoped QEMU on AMD64 Home Assistant hosts.
+- Includes the simplified Sync Mode settings and Web Configurator Management link.
+
 ## 0.14.3
 
 - Version mirrored automatically from UC Virtual Remote 0.14.3.
