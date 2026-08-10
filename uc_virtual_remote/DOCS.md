@@ -1,6 +1,6 @@
-# UC Virtual Remote ARM64
+# UC Virtual Remote
 
-This add-on runs the upstream **UC Virtual Remote ARM64** appliance inside Home Assistant.
+This add-on runs the upstream **UC Virtual Remote** appliance inside Home Assistant on `aarch64` and `amd64` systems.
 
 ## Before starting
 
@@ -35,13 +35,21 @@ Management/API:   http://HOME_ASSISTANT_HOST:11090/
 Core WebSocket:   ws://HOME_ASSISTANT_HOST:946/ws
 ```
 
-## Integrations
+## Architecture and integrations
 
-Normal UC ARM64 integration tarballs can be uploaded through the Web Configurator and run directly inside the appliance. External integrations continue to run as containers inside UC Virtual Remote's internal Docker daemon.
+The UC Virtual Remote Core, Web Configurator and internal Docker daemon run natively for the Home Assistant host architecture.
+
+Normal UC ARM64 integration tarballs remain unchanged:
+
+- on `aarch64`, ARM64 driver binaries run directly;
+- on `amd64`, only those ARM64 driver processes are launched through the bundled `qemu-aarch64-static` userspace emulator;
+- no host-wide ARM64 `binfmt_misc` registration is installed or required.
+
+External integrations continue to run as containers inside UC Virtual Remote's internal Docker daemon. Source-built external integrations build for the host architecture. Prebuilt external images need a compatible host-architecture variant or a registry source-build fallback.
 
 ## Updates
 
-The add-on version intentionally follows the upstream UC Virtual Remote ARM64 version. The add-on Dockerfile uses the same version as its upstream image, so it does not maintain an independent application codebase.
+The add-on version intentionally follows the upstream UC Virtual Remote version. The add-on Dockerfile uses the same version as its upstream multi-architecture image, so it does not maintain an independent application codebase.
 
 ## Backup
 
