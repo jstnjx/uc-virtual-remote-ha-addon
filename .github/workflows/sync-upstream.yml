@@ -1,0 +1,94 @@
+name: Sync upstream release
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Resolve latest upstream release
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST="$(curl -fsSL https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
+          CURRENT="$(sed -nE 's/^version:[[:space:]]*"?([^"[:space:]]+)"?[[:space:]]*$/\1/p' uc_virtual_remote/config.yaml)"
+          test -n "$LATEST"
+          test -n "$CURRENT"
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          if [[ "$LATEST" == "$CURRENT" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update add-on metadata
+        if: steps.version.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.latest }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          config = Path("uc_virtual_remote/config.yaml")
+          text = config.read_text(encoding="utf-8")
+          text, count = re.subn(r'^version:\s*.*$', f'version: "{version}"', text, count=1, flags=re.M)
+          if count != 1:
+              raise SystemExit("Unable to update add-on version")
+          config.write_text(text, encoding="utf-8")
+
+          changelog = Path("uc_virtual_remote/CHANGELOG.md")
+          current = changelog.read_text(encoding="utf-8")
+          entry = f"## {version}\n\n- Synced to UC Virtual Remote ARM64 {version}.\n\n"
+          if f"## {version}\n" not in current:
+              current = current.replace("# Changelog\n\n", "# Changelog\n\n" + entry, 1)
+              changelog.write_text(current, encoding="utf-8")
+          PY
+
+      - name: Set up QEMU
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Validate new upstream base image
+        if: steps.version.outputs.changed == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: ./uc_virtual_remote
+          file: ./uc_virtual_remote/Dockerfile
+          platforms: linux/arm64
+          push: false
+          build-args: |
+            BUILD_VERSION=${{ steps.version.outputs.latest }}
+            BUILD_ARCH=aarch64
+          tags: uc-virtual-remote-ha-addon:sync-check
+
+      - name: Commit synchronized version
+        if: steps.version.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.latest }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uc_virtual_remote/config.yaml uc_virtual_remote/CHANGELOG.md
+          git commit -m "Sync UC Virtual Remote ARM64 v${VERSION}"
+          git push origin HEAD:main
