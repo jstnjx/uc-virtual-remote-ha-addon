@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
   validate:
@@ -42,22 +41,34 @@ jobs:
           UPSTREAM_VERSION="$(curl -fsSL "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/v${VERSION}/VERSION" | tr -d '\r\n')"
           test "$UPSTREAM_VERSION" = "$VERSION"
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+      - name: Check anonymous upstream image access
+        id: registry
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/jstnjx/uc-virtual-remote-arm64:${VERSION}"
+          if docker manifest inspect "$IMAGE" >/dev/null 2>&1; then
+            echo "public=true" >> "$GITHUB_OUTPUT"
+            echo "Upstream image is anonymously pullable: $IMAGE"
+          else
+            echo "public=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Upstream image $IMAGE is not anonymously pullable. Home Assistant cannot build/install this add-on until the GHCR package visibility is Public."
+          fi
 
       - name: Set up QEMU
+        if: steps.registry.outputs.public == 'true'
         uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
 
       - name: Set up Docker Buildx
+        if: steps.registry.outputs.public == 'true'
         uses: docker/setup-buildx-action@v4
 
       - name: Build Home Assistant wrapper from upstream ARM64 image
+        if: steps.registry.outputs.public == 'true'
         uses: docker/build-push-action@v7
         with:
           context: ./uc_virtual_remote
