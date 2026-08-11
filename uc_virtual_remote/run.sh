@@ -38,5 +38,13 @@ export UCVR_DIND=true
 export UCVR_RUN_AS_ROOT=true
 export UCVR_UPDATE_REPOSITORY=jstnjx/uc-virtual-remote-arm64
 export UCVR_UPDATE_BRANCH=main
+export UCVR_SUPERVISOR_MANAGED=true
+export UCVR_SUPERVISOR_API_BASE=http://supervisor
+
+LEGACY_ACTIVE_RELEASE=/data/application/active.json
+if [[ -f "$LEGACY_ACTIVE_RELEASE" ]]; then
+  echo "UC Virtual Remote: Home Assistant Supervisor manages add-on updates; removing legacy in-app active release selection."
+  rm -f "$LEGACY_ACTIVE_RELEASE"
+fi
 
 exec /usr/local/bin/ucvr-entrypoint node /app/launcher.js
