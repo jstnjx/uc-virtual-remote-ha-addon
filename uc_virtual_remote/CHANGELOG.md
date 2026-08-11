@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.10
+
+- Version mirrored from UC Virtual Remote 0.14.10.
+- Fixes registry-backed Python integrations such as Spotify on restricted Home Assistant OS hosts by launching package entry points with `python -m <package>` when a package exposes `__main__.py`, instead of executing an internal implementation `driver.py` file.
+- Keeps explicit Python entrypoint overrides authoritative and adds the source checkout root to `PYTHONPATH` for integrations that intentionally run a script directly.
+- Fixes ARM64 PyInstaller custom-integration tarballs that resolve `driver.json` relative to `bin/driver` by exposing the package-root manifest beside the runtime executable without overwriting package-supplied data.
+- Fixes Spotify installation from both the integration registry and its ARM64 tarball on AMD64 Home Assistant hosts.
+
 ## 0.14.9
 
 - Version mirrored from UC Virtual Remote 0.14.9.
