@@ -1,5 +1,5 @@
 name: UC Virtual Remote
-version: "0.14.14"
+version: "0.14.15"
 slug: uc_virtual_remote_arm64
 description: >-
   UC Virtual Remote packaged for Home Assistant on ARM64 and AMD64. Normal ARM64
