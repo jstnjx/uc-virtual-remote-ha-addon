@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.12
+
+- Version mirrored from UC Virtual Remote 0.14.12.
+- Makes Home Assistant Supervisor authoritative for UC Virtual Remote add-on updates, preventing the Core application version from advancing independently of the installed add-on version.
+- The Web Configurator and Management software-update interfaces keep their existing workflow, but Home Assistant installations now delegate the final add-on update to Supervisor instead of extracting a second application release into persistent `/data`.
+- Enables Supervisor API access for the add-on so update checks use Home Assistant's installed/latest add-on versions and update installation targets the complete add-on package.
+- Removes the legacy `/data/application/active.json` selector on add-on startup, repairing existing installations where the in-app updater previously created a version mismatch without deleting configuration, integrations, resources or other user data.
+- Standalone Docker installations keep the existing UC Virtual Remote GitHub-based internal updater unchanged.
+
 ## 0.14.11
 
 - Version mirrored automatically from UC Virtual Remote 0.14.11.
