@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.9
+
+- Version mirrored from UC Virtual Remote 0.14.9.
+- Adds a Docker-free registry runtime for Home Assistant OS hosts where nested Docker cannot run: supported Python and Node.js integrations are checked out from source, installed into isolated runtime environments and supervised as unprivileged processes.
+- Fixes registry installation of official Python integrations such as Denon AVR on affected HAOS hosts instead of attempting `docker build` after the Docker runtime has already been marked unavailable.
+- Keeps prebuilt-image-only registry installs on Docker-capable hosts and reports a clear compatibility error when an integration cannot use the source-process fallback.
+- Restores all configured profiles in the Remote Simulator instead of filtering the selector to the old public demo profile.
+- Fixes the authenticated `/api/events` event stream used by the Remote Simulator, restoring live entity, activity, profile and simulator updates in the Web Configurator.
+- Keeps the existing entity control surfaces, activity overlays, remote button mappings and hardware-button simulation connected to the live Core APIs.
+
 ## 0.14.8
 
 - Version mirrored from UC Virtual Remote 0.14.8.
