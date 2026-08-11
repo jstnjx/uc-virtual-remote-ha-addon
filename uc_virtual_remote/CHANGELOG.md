@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.14
+
+- Version mirrored from UC Virtual Remote 0.14.14.
+- Fixes `401 Unauthorized` responses when mobile apps and other external clients render Core resource files such as icons and background images without propagating their API authorization header to the image request.
+- Supports the physical-Core resource download forms `/resources/:type/:id` and `/api/resources/:type/:id` by routing binary `GET` requests to UC Virtual Remote's existing immutable public resource endpoint.
+- Normalizes official `Icon` and `BackgroundImage` resource type names to the virtual remote's internal resource types.
+- Keeps resource listing, upload, deletion and all other Core/Management operations behind their existing authentication requirements.
+- External tools should address the virtual remote directly on the Home Assistant host network/UC Virtual Remote port rather than treating the Home Assistant Ingress URL as a device API endpoint.
+
 ## 0.14.13
 
 - Version mirrored from UC Virtual Remote 0.14.13.
