@@ -1,11 +1,11 @@
 name: UC Virtual Remote
-version: "0.14.8"
+version: "0.14.9"
 slug: uc_virtual_remote_arm64
 description: >-
   UC Virtual Remote packaged for Home Assistant on ARM64 and AMD64. Normal ARM64
   UC integration tarballs run natively on ARM64 and through scoped emulation on AMD64;
-  external integrations use the internal Docker runtime when the host delegates the
-  required namespaces and cgroups.
+  registry integrations use the internal Docker runtime when available and fall back
+  to supervised source processes for supported Python and Node.js integrations.
 url: https://github.com/jstnjx/uc-virtual-remote-ha-addon
 arch:
   - aarch64
