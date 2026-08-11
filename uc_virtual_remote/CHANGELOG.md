@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.14.15
+
+- Version mirrored from UC Virtual Remote 0.14.15.
+- Fixes Sync Mode enablement on Home Assistant OS when nested Docker is unavailable instead of failing with **“This installation source requires Docker, but nested Docker is unavailable on this host.”**
+- Sync Mode now requests **Automatic** installation for Remote Sync rather than forcing the prebuilt container-image path.
+- Registers and retains the `uc-remote-sync` GitHub source repository so HAOS can use UC Virtual Remote's supervised Node.js source-process runtime when Docker cannot run.
+- Docker-capable installations can continue using the prebuilt GHCR image automatically; the fallback changes only the runtime selection required on restricted hosts.
+- Custom GHCR integration definitions can now retain and persist an optional GitHub source repository for Automatic source fallback and update checks.
+
 ## 0.14.14
 
 - Version mirrored from UC Virtual Remote 0.14.14.
