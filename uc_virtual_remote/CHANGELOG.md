@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.13
+
+- Version mirrored from UC Virtual Remote 0.14.13.
+- Removes the Web Configurator login-screen prompt **“Looking for API definitions? Click here”** because those API-definition resources are not available on UC Virtual Remote.
+- Keeps the login and authentication flow unchanged; only the unavailable prompt is removed.
+
 ## 0.14.12
 
 - Version mirrored from UC Virtual Remote 0.14.12.
