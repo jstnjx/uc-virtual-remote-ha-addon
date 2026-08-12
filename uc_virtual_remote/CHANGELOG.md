@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0
+
+- Version mirrored from UC Virtual Remote 0.15.0.
+- Adds full Voice Assistant support with `voice_assistant` entities, assistant lifecycle events, binary protobuf voice streaming, and manual, ALSA, HTTP(S), and RTSP(S) audio inputs.
+- Updates advertised compatibility to REST Core API `0.46.0`, WebSocket Core API `0.35.3-beta`, and Integration API `0.15.4-beta` with current voice, runtime-info, active-profile, Bluetooth, logging, Dock, media, Wi-Fi, standby, and activity-button semantics.
+- Adds real Bluetooth LE HID over GATT/HOGP using the host BlueZ stack, including keyboard, relative mouse, consumer/media, system-control, modifier combinations, raw HID usages, `remote.send_cmd`, `remote.send_key`, and US-ASCII text support.
+- Adds current Dock `SET_VOLUME` handling with persisted and clamped volume state plus Dock state events.
+- Adds regression coverage for Voice Assistant protobuf/WebSocket transport, selectable audio sources, Bluetooth LE HID reports and command grammar, Integration API runtime info, active-profile events, API parity, and Dock volume behavior.
+- The add-on continues to expose the host D-Bus and device access required for BlueZ-backed Bluetooth HID; local microphone capture requires an ALSA-visible input device.
+
 ## 0.14.17
 
 - Version mirrored from UC Virtual Remote 0.14.17.
