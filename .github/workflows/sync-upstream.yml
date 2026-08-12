@@ -32,9 +32,10 @@ jobs:
           test -n "$TAG"
 
           VERSION="${TAG#v}"
-          UPSTREAM_VERSION="$(curl -fsSL \
-            "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/${TAG}/VERSION" \
-            | tr -d '\r\n')"
+          VERSION_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/contents/VERSION?ref=${TAG}")"
+          UPSTREAM_VERSION="$(jq -r '.content' <<<"$VERSION_JSON" | tr -d '\n' | base64 -d | tr -d '\r\n')"
           CURRENT="$(sed -nE 's/^version:[[:space:]]*"?([^"[:space:]]+)"?[[:space:]]*$/\1/p' uc_virtual_remote/config.yaml)"
 
           test -n "$VERSION"

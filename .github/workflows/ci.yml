@@ -67,6 +67,8 @@ jobs:
           grep -Fq 'privileged:' uc_virtual_remote/config.yaml
           grep -Fq '  - SYS_ADMIN' uc_virtual_remote/config.yaml
           grep -Fq 'full_access: true' uc_virtual_remote/config.yaml
+          grep -Fq 'hassio_api: true' uc_virtual_remote/config.yaml
+          grep -Fq 'homeassistant_api: true' uc_virtual_remote/config.yaml
           grep -Fq 'host_network: true' uc_virtual_remote/config.yaml
           grep -Fq 'ingress: true' uc_virtual_remote/config.yaml
           grep -Eq '^webui:[[:space:]]*(https?|\[PROTO:[A-Za-z0-9_]+\])://\[HOST\]:\[PORT:[0-9]+\]/?.*$' uc_virtual_remote/config.yaml

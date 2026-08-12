@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.15.1
+
+- Version mirrored from UC Virtual Remote 0.15.1.
+- Fixes Management-interface updates failing with **“App self does not exist in the store”** on Home Assistant installations.
+- Delegates Supervisor-managed self-updates through Home Assistant Core's `update.install` service instead of the Supervisor Store endpoint that deliberately forbids an add-on from updating itself.
+- Enables `homeassistant_api` access so UC Virtual Remote can use Supervisor's authenticated Home Assistant Core API proxy for the delegated update.
+- Resolves the Home Assistant update entity dynamically, including installations where its entity ID was renamed.
+- Keeps standalone Docker self-updates unchanged.
+
 ## 0.15.0
 
 - Version mirrored from UC Virtual Remote 0.15.0.
