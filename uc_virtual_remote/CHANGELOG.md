@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.16
+
+- Version mirrored from UC Virtual Remote 0.14.16.
+- Clarifies Sync Mode's synchronization levels so **live usage**, **configuration-change sync**, **periodic reconciliation**, and the **daily full audit** are no longer presented as one timer-driven sync mechanism.
+- Renames **Sync every** to **Reconcile every** and explains that configuration changes are event-driven rather than waiting for the reconciliation interval.
+- Keeps text already entered in the **Add new integration** search field when integration discovery finishes after the user has started typing.
+- Fixes official Home Assistant integration installation on Home Assistant OS hosts where nested Docker is unavailable by using Unfolded Circle's official architecture-specific release binary in UCVR's supervised process runtime.
+- Uses the official Linux-x64 Home Assistant integration artifact on AMD64 and the official UCR2 artifact on ARM64; no Rust compiler or nested Docker is required for this fallback.
+- Generates a per-instance integration listener configuration so the supervised Home Assistant integration uses UCVR's assigned port instead of colliding on its default port 8000.
+
 ## 0.14.15
 
 - Version mirrored from UC Virtual Remote 0.14.15.
@@ -30,7 +40,7 @@
 - Makes Home Assistant Supervisor authoritative for UC Virtual Remote add-on updates, preventing the Core application version from advancing independently of the installed add-on version.
 - The Web Configurator and Management software-update interfaces keep their existing workflow, but Home Assistant installations now delegate the final add-on update to Supervisor instead of extracting a second application release into persistent `/data`.
 - Enables Supervisor API access for the add-on so update checks use Home Assistant's installed/latest add-on versions and update installation targets the complete add-on package.
-- Removes the legacy `/data/application/active.json` selector on add-on startup, repairing existing installations where the in-app updater previously created a version mismatch without deleting configuration, integrations, resources or other user data.
+- Removes the legacy `/data/application/active.json` selector on add-on startup, repairing existing installations where the in-app updater previously created a version mismatch without deleting user configuration, integrations, resources or other persistent data.
 - Standalone Docker installations keep the existing UC Virtual Remote GitHub-based internal updater unchanged.
 
 ## 0.14.11
