@@ -40,9 +40,10 @@ jobs:
           test -n "$TAG"
 
           LATEST="${TAG#v}"
-          UPSTREAM_VERSION="$(curl -fsSL \
-            "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/${TAG}/VERSION" \
-            | tr -d '\r\n')"
+          VERSION_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/contents/VERSION?ref=${TAG}")"
+          UPSTREAM_VERSION="$(jq -r '.content' <<<"$VERSION_JSON" | tr -d '\n' | base64 -d | tr -d '\r\n')"
 
           test "$LATEST" = "$UPSTREAM_VERSION"
           if [[ "$VERSION" != "$UPSTREAM_VERSION" ]]; then
@@ -79,7 +80,10 @@ jobs:
           set -euo pipefail
           bash -n uc_virtual_remote/run.sh
           grep -Fq 'FROM ghcr.io/jstnjx/uc-virtual-remote-arm64:${BUILD_VERSION}' uc_virtual_remote/Dockerfile
-          UPSTREAM_VERSION="$(curl -fsSL "https://raw.githubusercontent.com/jstnjx/uc-virtual-remote-arm64/v${VERSION}/VERSION" | tr -d '\r\n')"
+          VERSION_JSON="$(curl -fsSL \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/jstnjx/uc-virtual-remote-arm64/contents/VERSION?ref=v${VERSION}")"
+          UPSTREAM_VERSION="$(jq -r '.content' <<<"$VERSION_JSON" | tr -d '\n' | base64 -d | tr -d '\r\n')"
           test "$UPSTREAM_VERSION" = "$VERSION"
 
       - name: Require public upstream multiarch image
