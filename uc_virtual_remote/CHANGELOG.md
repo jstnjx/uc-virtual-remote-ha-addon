@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.17
+
+- Version mirrored from UC Virtual Remote 0.14.17.
+- Fixes settings that could appear saved but later revert because the Web Configurator replayed a stale cached copy of the entire configuration section when changing one field.
+- Single-setting changes are now sent as partial PATCHes, preserving sibling values such as display/button lighting, Bluetooth/Wi-Fi, Power Saving, Sound and other multi-field settings.
+- Restores explicitly persisted Bluetooth power, Wi-Fi power and Bluetooth HCI logging state after an add-on restart without applying default radio states to the Home Assistant host.
+- Exposes persisted Voice Control configuration through the `voice` compatibility key expected by Web Configurator 2.3.3 and keeps configuration-change events synchronized with it.
+- Fixes the Haptic Feedback toggle writing the Sound Effects toggle value instead of its own value.
+- Adds restart-persistence regression coverage for display brightness, button-backlight brightness/color, Bluetooth/HCI state and Voice Control.
+
 ## 0.14.16
 
 - Version mirrored from UC Virtual Remote 0.14.16.
